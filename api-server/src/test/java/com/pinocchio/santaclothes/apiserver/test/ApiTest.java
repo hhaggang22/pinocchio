@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 
-import com.pinocchio.santaclothes.apiserver.ApiServerApplication;
+import com.pinnochio.santaclothes.apiserver.ApiServerApplication;
 
 import io.restassured.RestAssured;
 
