@@ -11,6 +11,7 @@ public class UploadRequestDto {
 	String userId;
 
 	public String getUserId() {
+
 		return userId;
 	}
 }
