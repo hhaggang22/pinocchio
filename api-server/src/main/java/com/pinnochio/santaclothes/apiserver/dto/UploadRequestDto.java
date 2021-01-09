@@ -1,6 +1,10 @@
 package com.pinnochio.santaclothes.apiserver.dto;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -13,14 +17,10 @@ public class UploadRequestDto {
 
 	String userId;
 
-	@JsonFormat(pattern = "yyyy-MM-dd kk:mm:ss")
-	LocalDateTime uploadDateTime;
+	//@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	Instant uploadDateTime = Instant.now();
 
-	public String getUserId() {
-		return userId;
-	}
+	MultipartFile uploadFile;
 
-	public LocalDateTime getUploadDateTime() {
-		return uploadDateTime;
-	}
+
 }
