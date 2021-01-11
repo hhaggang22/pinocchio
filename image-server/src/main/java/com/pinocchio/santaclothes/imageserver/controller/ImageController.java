@@ -9,10 +9,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.pinocchio.santaclothes.imageserver.dto.ImageUploadRequestDto;
+import com.pinocchio.santaclothes.imageserver.dto.ImageUploadResponseDto;
+
 @RestController
 public class ImageController {
 	@PostMapping("/Imageupload")
-	public UploadResponseDto upload(@ModelAttribute UploadRequestDto requestDto) { // 요청받은 데이터를 UploadRequestDto에 저장
+	public ImageUploadResponseDto upload(@ModelAttribute ImageUploadRequestDto requestDto) { // 요청받은 데이터를 UploadRequestDto에 저장
 		String userId = requestDto.getUserId();
 		Instant uploadDateTime = requestDto.getUploadDateTime();
 		MultipartFile uploadFile = requestDto.getUploadFile();
@@ -25,6 +28,6 @@ public class ImageController {
 			e.printStackTrace();
 		}
 
-		return new UploadResponseDto(userId, uploadDateTime, uploadFile);
+		return new ImageUploadResponseDto(userId, uploadDateTime, uploadFile);
 	}
 }

@@ -4,6 +4,9 @@ import java.time.Instant;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import lombok.Value;
+
+@Value
 public class ImageUploadResponseDto {
 	String userId;
 
