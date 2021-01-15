@@ -1,39 +1,79 @@
 package com.pinnochio.santaclothes.apiserver.controller;
 
-import java.io.File;
-import java.io.IOException;
-import java.time.Instant;
-import java.time.LocalDateTime;
+import javax.validation.Valid;
 
-import javax.persistence.criteria.CriteriaBuilder;
-
-import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
-import com.pinnochio.santaclothes.apiserver.dto.UploadRequestDto;
-import com.pinnochio.santaclothes.apiserver.dto.UploadResponseDto;
+import com.pinnochio.santaclothes.apiserver.dto.CaptureEventCreateRequestResponse;
+import com.pinnochio.santaclothes.apiserver.dto.CaptureEventResponse;
+import com.pinnochio.santaclothes.apiserver.dto.CaptureEventUpdateRequest;
+import com.pinnochio.santaclothes.apiserver.entity.CaptureEvent;
+import com.pinnochio.santaclothes.apiserver.service.CaptureService;
+import com.pinnochio.santaclothes.apiserver.service.dto.CaptureEventUpdateDto;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
+@RequiredArgsConstructor
 public class ApiController {
+	private final CaptureService captureService;
 
-	@PostMapping("/upload")
-	public UploadResponseDto upload(@ModelAttribute UploadRequestDto requestDto) { // 요청받은 데이터를 UploadRequestDto에 저장
-		String userId = requestDto.getUserId();
-		Instant uploadDateTime = requestDto.getUploadDateTime();
-		MultipartFile uploadFile = requestDto.getUploadFile();
-
-		String originalFileName = uploadFile.getOriginalFilename();
-		File dest = new File("C:/Image/" + originalFileName);
-		try{
-			uploadFile.transferTo(dest);
-		}catch(IOException e){
-			e.printStackTrace();
-		}
-
-		return new UploadResponseDto(userId, uploadDateTime, uploadFile);
+	@GetMapping("/healthCheck")
+	public String healthCheck() {
+		return "ok";
 	}
 
+	@GetMapping("/capture/event/{eventId}")
+	@ResponseStatus(HttpStatus.OK)
+	public CaptureEventResponse fetchEvent(@PathVariable("eventId") String eventId) {
+		CaptureEvent event = captureService.findById(eventId);
+		return CaptureEventResponse.builder()
+			.eventId(event.getEventId())
+			.imageId(event.getImageId())
+			.status(event.getStatus())
+			.result(event.getResult())
+			.build();
+	}
+
+	@PutMapping("/capture/event/{eventId}/resume")
+	@ResponseStatus(HttpStatus.OK)
+	public void resumeEvent(@PathVariable("eventId") String eventId) {
+		captureService.resume(eventId);
+	}
+
+	@PostMapping("/capture/event")
+	@ResponseStatus(HttpStatus.CREATED)
+	public CaptureEventCreateRequestResponse.CaptureEventCreateResponse createEvent(@RequestBody CaptureEventCreateRequestResponse.CaptureEventCreateRequest request) {
+		CaptureEvent captureEvent = CaptureEvent.builder()
+			.eventId(request.getEventId())
+			.imageId(request.getImageId())
+			.status(request.getEventStatus())
+			.build();
+		captureService.save(captureEvent);
+		return new CaptureEventCreateRequestResponse.CaptureEventCreateResponse(captureEvent.getEventId());
+	}
+
+	@PutMapping("/capture/event")
+	@ResponseStatus(HttpStatus.OK)
+	public CaptureEventResponse updateEvent(@Valid @RequestBody CaptureEventUpdateRequest request) {
+		CaptureEventUpdateDto updateDto = CaptureEventUpdateDto.builder()
+			.eventId(request.getEventId())
+			.imageId(request.getImageId())
+			.status(request.getStatus())
+			.build();
+		CaptureEvent event = captureService.update(updateDto);
+
+		return CaptureEventResponse.builder()
+			.eventId(event.getEventId())
+			.imageId(event.getImageId())
+			.status(event.getStatus())
+			.build();
+	}
 }
