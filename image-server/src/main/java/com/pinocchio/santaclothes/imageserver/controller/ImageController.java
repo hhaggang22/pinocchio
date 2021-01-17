@@ -1,33 +1,41 @@
 package com.pinocchio.santaclothes.imageserver.controller;
 
-import java.io.File;
-import java.io.IOException;
-import java.time.Instant;
+import java.util.UUID;
 
-import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
-import com.pinocchio.santaclothes.imageserver.dto.ImageUploadRequestDto;
-import com.pinocchio.santaclothes.imageserver.dto.ImageUploadResponseDto;
+import com.pinocchio.santaclothes.imageserver.controller.dto.ImageRequest;
+import com.pinocchio.santaclothes.imageserver.service.CaptureEventService;
+import com.pinocchio.santaclothes.imageserver.service.dto.CaptureImageRequest;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
+@RequiredArgsConstructor
+@Slf4j
 public class ImageController {
-	@PostMapping("/Imageupload")
-	public ImageUploadResponseDto upload(@ModelAttribute ImageUploadRequestDto requestDto) { // 요청받은 데이터를 UploadRequestDto에 저장
-		String userId = requestDto.getUserId();
-		Instant uploadDateTime = requestDto.getUploadDateTime();
-		MultipartFile uploadFile = requestDto.getUploadFile();
+	private final CaptureEventService captureEventService;
 
-		String originalFileName = uploadFile.getOriginalFilename();
-		File dest = new File("C:/Image/" + originalFileName);
-		try{
-			uploadFile.transferTo(dest);
-		}catch(IOException e){
-			e.printStackTrace();
-		}
+	@GetMapping("/upload")
+	public String uploadTest() {
+		return "test";
+	}
 
-		return new ImageUploadResponseDto(userId, uploadDateTime, uploadFile);
+	@PostMapping("/upload")
+	@ResponseStatus(HttpStatus.OK)
+	public void upload(ImageRequest request) {
+		String imageId = UUID.randomUUID().toString();
+		String captureId = UUID.randomUUID().toString();
+		CaptureImageRequest captureImageRequest = CaptureImageRequest.builder()
+			.imageId(imageId)
+			.eventId(captureId)
+			.image(request.getUploadFile())
+			.build();
+		captureEventService.saveImage(captureImageRequest);
 	}
 }
